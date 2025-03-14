@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Filtering Analysis Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 5px;
+        }
+        .filter-section {
+            margin-bottom: 40px;
+        }
+        .case-section {
+            margin-bottom: 50px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        pre {
+            background-color: #1e1e1e;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', 'Andale Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            height: 100%;
+            margin: 0;
+        }
+        .code-comment {
+            color: #6a9955;
+        }
+        .code-keyword {
+            color: #569cd6;
+        }
+        .code-function {
+            color: #dcdcaa;
+        }
+        .code-string {
+            color: #ce9178;
+        }
+        .code-number {
+            color: #b5cea8;
+        }
+        .code-method {
+            color: #4ec9b0;
+        }
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .image-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        .image-box h4 {
+            text-align: center;
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .comparison {
+            margin-top: 30px;
+        }
+        .audio-player {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .line-number {
+            color: #858585;
+            display: inline-block;
+            width: 2em;
+            text-align: right;
+            margin-right: 1em;
+            user-select: none;
+        }
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            align-items: stretch;
+        }
+        .filter-description {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-code {
+            flex: 1;
+            min-width: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .note-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 0;
+            border-radius: 0 5px 5px 0;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Filtering Analysis Report</h1>
+    
+    <section class="filter-section">
+        <h2>Filters Implemented</h2>
+        <p>This project implements two different types of filters for audio processing:</p>
+        
+        <h3>1. Low-Pass FIR Filter</h3>
+        <div class="filter-container">
+            <div class="filter-description">
+                <div class="note-box">
+                    <h4>What is a Low-Pass FIR Filter?</h4>
+                    <p>A Finite Impulse Response (FIR) filter is a type of digital filter characterized by having a finite response to an impulse input. The "low-pass" designation means it allows frequencies below a specified cutoff to pass through while attenuating higher frequencies.</p>
+                    
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li><strong>Linear Phase:</strong> FIR filters can be designed with linear phase response, which preserves the shape of the signal components</li>
+                        <li><strong>Stability:</strong> Always stable due to absence of feedback</li>
+                        <li><strong>Finite Memory:</strong> Output depends only on a finite number of past inputs</li>
+                    </ul>
+                    
+                    <h4>Mathematical Representation:</h4>
+                    <p>The output y[n] of an FIR filter of order N is given by:</p>
+                    <p class="math">y[n] = b₀x[n] + b₁x[n-1] + ... + bₙx[n-N]</p>
+                    <p>Where b₀, b₁, ..., bₙ are the filter coefficients and x[n] is the input signal.</p>
+                    
+                    <h4>Implementation Method:</h4>
+                    <p>Our implementation uses the window method with a sinc function (the ideal low-pass filter in the time domain) and a Hamming window to reduce spectral leakage. For this project, we use a cutoff frequency of <strong>4000 Hz</strong> and a filter order of 101.</p>
+                </div>
+            </div>
+            <div class="filter-code">
+                <pre><span class="line-number">1</span><span class="code-keyword">def</span> <span class="code-function">create_lowpass_fir</span>(self, order, cutoff):
+<span class="line-number">2</span>    nyquist = self.sample_rate / <span class="code-number">2</span>
+<span class="line-number">3</span>    cutoff = cutoff / nyquist
+<span class="line-number">4</span>    
+<span class="line-number">5</span>    <span class="code-comment"># Ensure order is odd for symmetric filter</span>
+<span class="line-number">6</span>    <span class="code-keyword">if</span> order % <span class="code-number">2</span> == <span class="code-number">0</span>:
+<span class="line-number">7</span>        order += <span class="code-number">1</span>
+<span class="line-number">8</span>    
+<span class="line-number">9</span>    <span class="code-comment"># Create time indices centered at zero</span>
+<span class="line-number">10</span>    n = np.<span class="code-method">arange</span>(-(order-<span class="code-number">1</span>)//<span class="code-number">2</span>, (order-<span class="code-number">1</span>)//<span class="code-number">2</span> + <span class="code-number">1</span>)
+<span class="line-number">11</span>    
+<span class="line-number">12</span>    <span class="code-comment"># Create ideal lowpass filter (sinc function)</span>
+<span class="line-number">13</span>    h_ideal = <span class="code-number">2</span> * cutoff * np.<span class="code-method">sinc</span>(<span class="code-number">2</span> * cutoff * n)
+<span class="line-number">14</span>    
+<span class="line-number">15</span>    <span class="code-comment"># Apply Hamming window for better frequency response</span>
+<span class="line-number">16</span>    window = np.<span class="code-method">hamming</span>(order)
+<span class="line-number">17</span>    h = h_ideal * window
+<span class="line-number">18</span>    
+<span class="line-number">19</span>    <span class="code-comment"># Normalize to ensure unity gain at DC</span>
+<span class="line-number">20</span>    h = h / np.<span class="code-method">sum</span>(h)
+<span class="line-number">21</span>    
+<span class="line-number">22</span>    <span class="code-keyword">return</span> signal.<span class="code-method">lfilter</span>(h, <span class="code-number">1.0</span>, self.audio_data)</pre>
+            </div>
+        </div>
+
+        <h3>2. Kalman Filter</h3>
+        <div class="filter-container">
+            <div class="filter-description">
+                <div class="note-box">
+                    <h4>What is a Kalman Filter?</h4>
+                    <p>The Kalman filter is a recursive algorithm that estimates the state of a dynamic system from a series of noisy measurements. Unlike traditional filters that operate in the frequency domain, the Kalman filter is a state-space model that adapts to the statistical properties of the signal.</p>
+                    
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li><strong>Adaptive:</strong> Continuously updates estimates based on new measurements</li>
+                        <li><strong>Optimal:</strong> Minimizes the mean square error of the estimated parameters</li>
+                        <li><strong>Recursive:</strong> Only needs the previous state and current measurement</li>
+                        <li><strong>Probabilistic:</strong> Accounts for uncertainty in both the system model and measurements</li>
+                    </ul>
+                    
+                    <h4>How It Works:</h4>
+                    <p>The Kalman filter operates in two steps:</p>
+                    <ol>
+                        <li><strong>Prediction Step:</strong> Predicts the current state based on the previous state</li>
+                        <li><strong>Update Step:</strong> Corrects the prediction using the current measurement</li>
+                    </ol>
+                    
+                    <h4>Applications in Audio:</h4>
+                    <p>In audio processing, the Kalman filter can be used for noise reduction while preserving the underlying signal structure. It's particularly effective for non-stationary signals where the statistical properties change over time. In our implementation, we use a process variance of <strong>1e-3</strong> and a measurement variance of 1e-2.</p>
+                </div>
+            </div>
+            <div class="filter-code">
+                <pre><span class="line-number">1</span><span class="code-keyword">def</span> <span class="code-function">apply_kalman_filter</span>(self, process_variance=<span class="code-number">1e-5</span>, measurement_variance=<span class="code-number">1e-2</span>):
+<span class="line-number">2</span>    <span class="code-comment"># Initialize Kalman filter state</span>
+<span class="line-number">3</span>    x_est = self.audio_data[<span class="code-number">0</span>]  <span class="code-comment"># Initial state estimate</span>
+<span class="line-number">4</span>    p_est = <span class="code-number">1.0</span>             <span class="code-comment"># Initial error estimate</span>
+<span class="line-number">5</span>    
+<span class="line-number">6</span>    <span class="code-comment"># Output array</span>
+<span class="line-number">7</span>    filtered_signal = np.<span class="code-method">zeros_like</span>(self.audio_data)
+<span class="line-number">8</span>    filtered_signal[<span class="code-number">0</span>] = x_est
+<span class="line-number">9</span>    
+<span class="line-number">10</span>    <span class="code-comment"># Apply Kalman filter</span>
+<span class="line-number">11</span>    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-number">1</span>, <span class="code-function">len</span>(self.audio_data)):
+<span class="line-number">12</span>        <span class="code-comment"># Prediction step</span>
+<span class="line-number">13</span>        x_pred = x_est
+<span class="line-number">14</span>        p_pred = p_est + process_variance
+<span class="line-number">15</span>        
+<span class="line-number">16</span>        <span class="code-comment"># Update step (correction)</span>
+<span class="line-number">17</span>        k_gain = p_pred / (p_pred + measurement_variance)  <span class="code-comment"># Kalman gain</span>
+<span class="line-number">18</span>        x_est = x_pred + k_gain * (self.audio_data[i] - x_pred)
+<span class="line-number">19</span>        p_est = (<span class="code-number">1</span> - k_gain) * p_pred
+<span class="line-number">20</span>        
+<span class="line-number">21</span>        <span class="code-comment"># Store the filtered value</span>
+<span class="line-number">22</span>        filtered_signal[i] = x_est
+<span class="line-number">23</span>    
+<span class="line-number">24</span>    <span class="code-keyword">return</span> filtered_signal</pre>
+            </div>
+        </div>
+
+        <h3>3. Sequential Filtering</h3>
+        <div class="filter-container">
+            <div class="filter-description">
+                <div class="note-box">
+                    <h4>What is Sequential Filtering?</h4>
+                    <p>Sequential filtering is a technique where multiple filters are applied one after another in a cascade arrangement. In our implementation, we apply the Low-Pass FIR filter first, followed by the Kalman filter.</p>
+                    
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li><strong>Complementary Effects:</strong> Combines the strengths of both filters - frequency selectivity from FIR and statistical noise reduction from Kalman</li>
+                        <li><strong>Enhanced Noise Reduction:</strong> More aggressive noise removal than either filter alone</li>
+                        <li><strong>Order Dependency:</strong> The sequence of filters matters - different results would be obtained by reversing the order</li>
+                    </ul>
+                    
+                    <h4>How It Works:</h4>
+                    <p>The process follows these steps:</p>
+                    <ol>
+                        <li>The original audio signal is first processed by the Low-Pass FIR filter with a <strong>4000 Hz</strong> cutoff to remove high-frequency components</li>
+                        <li>The resulting filtered signal is then fed into the Kalman filter with a process variance of <strong>1e-3</strong> for further noise reduction and smoothing</li>
+                        <li>The final output combines the effects of both filters</li>
+                    </ol>
+                    
+                    <h4>Applications:</h4>
+                    <p>Sequential filtering is particularly useful for audio signals with both high-frequency noise and random fluctuations. The FIR filter handles the frequency-domain noise while the Kalman filter addresses the time-domain variations.</p>
+                </div>
+            </div>
+            <div class="filter-code">
+                <pre><span class="line-number">1</span><span class="code-keyword">def</span> <span class="code-function">apply_sequential_filtering</span>(self, filter_order=<span class="code-number">101</span>, cutoff_freq=<span class="code-number">1000</span>):
+<span class="line-number">2</span>    <span class="code-comment">"""
+<span class="line-number">3</span>    Apply FIR filter followed by Kalman filter in sequence.
+<span class="line-number">4</span>    
+<span class="line-number">5</span>    Parameters:
+<span class="line-number">6</span>    - filter_order: Order of the FIR filter
+<span class="line-number">7</span>    - cutoff_freq: Cutoff frequency for the FIR filter in Hz
+<span class="line-number">8</span>    
+<span class="line-number">9</span>    Returns:
+<span class="line-number">10</span>    - Sequentially filtered signal
+<span class="line-number">11</span>    """</span>
+<span class="line-number">12</span>    <span class="code-comment"># First apply the FIR low-pass filter</span>
+<span class="line-number">13</span>    fir_filtered = self.<span class="code-method">create_lowpass_fir</span>(filter_order, cutoff_freq)
+<span class="line-number">14</span>    
+<span class="line-number">15</span>    <span class="code-comment"># Store the FIR filtered data temporarily</span>
+<span class="line-number">16</span>    original_data = self.audio_data
+<span class="line-number">17</span>    self.audio_data = fir_filtered
+<span class="line-number">18</span>    
+<span class="line-number">19</span>    <span class="code-comment"># Then apply the Kalman filter to the FIR filtered data</span>
+<span class="line-number">20</span>    sequential_filtered = self.<span class="code-method">apply_kalman_filter</span>()
+<span class="line-number">21</span>    
+<span class="line-number">22</span>    <span class="code-comment"># Restore the original audio data</span>
+<span class="line-number">23</span>    self.audio_data = original_data
+<span class="line-number">24</span>    
+<span class="line-number">25</span>    <span class="code-keyword">return</span> sequential_filtered</pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="filter-section">
+        <h2>Filter Comparison</h2>
+        <table>
+            <tr>
+                <th>Feature</th>
+                <th>Low-Pass FIR Filter</th>
+                <th>Kalman Filter</th>
+                <th>Sequential Filter</th>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td>Fixed frequency response</td>
+                <td>Adaptive state estimation</td>
+                <td>Hybrid (cascaded filters)</td>
+            </tr>
+            <tr>
+                <td>Primary Effect</td>
+                <td>Removes frequencies above cutoff</td>
+                <td>Smooths signal based on statistical properties</td>
+                <td>Removes high frequencies and smooths remaining signal</td>
+            </tr>
+            <tr>
+                <td>Parameters</td>
+                <td>Order (101), Cutoff frequency (<strong>4000 Hz</strong>)</td>
+                <td>Process variance (<strong>1e-3</strong>), Measurement variance (1e-2)</td>
+                <td>Combines parameters from both filters</td>
+            </tr>
+            <tr>
+                <td>Best For</td>
+                <td>Removing specific frequency bands</td>
+                <td>Noise reduction with signal preservation</td>
+                <td>Complex noise scenarios requiring multi-stage filtering</td>
+            </tr>
+            <tr>
+                <td>Computational Complexity</td>
+                <td>O(n * filter_order)</td>
+                <td>O(n) - linear with signal length</td>
+                <td>O(n * filter_order + n) - sum of both filters</td>
+            </tr>
+        </table>
+    </section>
+
+    <h2>Audio Case Studies</h2>
+
+    <section class="case-section">
+        <h3>Case 1: Pink Noise</h3>
+        <p>
+            Pink noise has energy that decreases at a rate of 3 dB per octave, meaning it has more energy in lower frequencies.
+            This makes it a good test case for our filters as it contains a broad spectrum of frequencies.
+        </p>
+        
+        <div class="audio-container">
+            <h4>Audio Samples:</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Original:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Pink_Noise/pink_noise_original.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Low-Pass FIR Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Pink_Noise/pink_noise_lowpass.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Kalman Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Pink_Noise/pink_noise_kalman.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Sequential Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Pink_Noise/pink_noise_sequential.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </div>
+        
+        <div class="image-container">
+            <div class="image-box">
+                <h4>Frequency Response</h4>
+                <img src="Sound/Pink_Noise/all_filters_frequency_response.png" alt="Pink Noise Frequency Response">
+            </div>
+            <div class="image-box">
+                <h4>Spectrograms</h4>
+                <img src="Sound/Pink_Noise/all_filters_spectrogram.png" alt="Pink Noise Spectrograms">
+            </div>
+        </div>
+        
+        <h4>Observations:</h4>
+        <ul>
+            <li>The <strong>Low-Pass FIR Filter</strong> effectively removes high-frequency components above 4000 Hz, resulting in a slightly warmer sound while preserving more mid-range frequencies compared to a lower cutoff.</li>
+            <li>The <strong>Kalman Filter</strong> with the increased process variance (1e-3) is more responsive to changes in the signal, resulting in less aggressive smoothing but better preservation of transient details.</li>
+            <li>The <strong>Sequential Filter</strong> combines both effects, first removing very high frequencies and then applying moderate smoothing to the remaining signal, creating a balanced noise reduction effect.</li>
+        </ul>
+    </section>
+
+    <section class="case-section">
+        <h3>Case 2: Monologue</h3>
+        <p>
+            Human speech typically has fundamental frequencies between 85-255 Hz, with harmonics and consonants extending to higher frequencies.
+            This case tests how our filters handle speech intelligibility and quality.
+        </p>
+        
+        <div class="audio-container">
+            <h4>Audio Samples:</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Original:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Monologue/monologue_original.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Low-Pass FIR Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Monologue/monologue_lowpass.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Kalman Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Monologue/monologue_kalman.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Sequential Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Monologue/monologue_sequential.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </div>
+        
+        <div class="image-container">
+            <div class="image-box">
+                <h4>Frequency Response</h4>
+                <img src="Sound/Monologue/all_filters_frequency_response.png" alt="Monologue Frequency Response">
+            </div>
+            <div class="image-box">
+                <h4>Spectrograms</h4>
+                <img src="Sound/Monologue/all_filters_spectrogram.png" alt="Monologue Spectrograms">
+            </div>
+        </div>
+        
+        <h4>Observations:</h4>
+        <ul>
+            <li>The <strong>Low-Pass FIR Filter</strong> with a 4000 Hz cutoff preserves most speech intelligibility, including many consonant sounds, while still reducing some high-frequency noise. This higher cutoff is more appropriate for speech than lower values.</li>
+            <li>The <strong>Kalman Filter</strong> with increased process variance (1e-3) follows the speech contours more closely, preserving more of the natural voice characteristics while still reducing background noise.</li>
+            <li>The <strong>Sequential Filter</strong> provides a good balance, removing the highest frequency noise components while maintaining speech clarity and reducing fluctuations in the signal.</li>
+        </ul>
+    </section>
+
+    <section class="case-section">
+        <h3>Case 3: Instrumental Music</h3>
+        <p>
+            Instrumental music contains a wide range of frequencies from low bass notes to high harmonics.
+            This case tests how our filters affect the tonal balance and musical quality.
+        </p>
+        
+        <div class="audio-container">
+            <h4>Audio Samples:</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Original:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Instrumental/instrumental_original.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Low-Pass FIR Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Instrumental/instrumental_lowpass.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Kalman Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Instrumental/instrumental_kalman.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Sequential Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Instrumental/instrumental_sequential.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </div>
+        
+        <div class="image-container">
+            <div class="image-box">
+                <h4>Frequency Response</h4>
+                <img src="Sound/Instrumental/all_filters_frequency_response.png" alt="Instrumental Frequency Response">
+            </div>
+            <div class="image-box">
+                <h4>Spectrograms</h4>
+                <img src="Sound/Instrumental/all_filters_spectrogram.png" alt="Instrumental Spectrograms">
+            </div>
+        </div>
+        
+        <h4>Observations:</h4>
+        <ul>
+            <li>The <strong>Low-Pass FIR Filter</strong> with a 4000 Hz cutoff preserves much more of the musical detail and brightness compared to lower cutoff frequencies, maintaining the character of most instruments while still reducing some high-frequency content.</li>
+            <li>The <strong>Kalman Filter</strong> with increased process variance (1e-3) better preserves the attack transients of instruments while still providing some smoothing effect, resulting in a more natural musical sound.</li>
+            <li>The <strong>Sequential Filter</strong> provides a balanced effect, removing some high-frequency content while preserving more of the musical dynamics than would be possible with more aggressive parameter settings.</li>
+        </ul>
+    </section>
+
+    <section class="case-section">
+        <h3>Case 4: Interesting Audio</h3>
+        <p>
+            This audio sample contains a mix of different sounds and frequencies, providing a complex test case for our filters.
+        </p>
+        
+        <div class="audio-container">
+            <h4>Audio Samples:</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Original:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Interesting/interesting_original.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Low-Pass FIR Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Interesting/interesting_lowpass.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Kalman Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Interesting/interesting_kalman.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p>Sequential Filtered:</p>
+                    <audio controls class="audio-player">
+                        <source src="Sound/Interesting/interesting_sequential.wav" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </div>
+        
+        <div class="image-container">
+            <div class="image-box">
+                <h4>Frequency Response</h4>
+                <img src="Sound/Interesting/all_filters_frequency_response.png" alt="Interesting Audio Frequency Response">
+            </div>
+            <div class="image-box">
+                <h4>Spectrograms</h4>
+                <img src="Sound/Interesting/all_filters_spectrogram.png" alt="Interesting Audio Spectrograms">
+            </div>
+        </div>
+        
+        <h4>Observations:</h4>
+        <ul>
+            <li>The <strong>Low-Pass FIR Filter</strong> with a 4000 Hz cutoff selectively removes only the highest frequency components, preserving most of the audio's spectral character.</li>
+            <li>The <strong>Kalman Filter</strong> with increased process variance (1e-3) tracks the signal changes more responsively, resulting in less smoothing but better preservation of the audio's unique characteristics.</li>
+            <li>The <strong>Sequential Filter</strong> demonstrates how even with more moderate parameter settings, the combination of filters still creates a distinctive sound that differs from either filter alone.</li>
+        </ul>
+    </section>
+
+    <section class="filter-section">
+        <h2>Conclusions</h2>
+        <p>
+            Based on our analysis of the four audio cases with the updated parameters (4000 Hz cutoff and 1e-3 process variance), we can draw the following conclusions:
+        </p>
+        
+        <ul>
+            <li><strong>Low-Pass FIR Filter:</strong> The higher cutoff frequency of 4000 Hz preserves more of the audio's natural character while still providing some noise reduction. This setting is particularly beneficial for speech and music where preserving high-frequency detail is important.</li>
+            <li><strong>Kalman Filter:</strong> The increased process variance of 1e-3 makes the filter more responsive to signal changes, resulting in less aggressive smoothing but better preservation of transient details and natural sound characteristics.</li>
+            <li><strong>Sequential Filtering:</strong> With the updated parameters, the sequential filter provides a more balanced effect that removes some high-frequency content while preserving more of the signal's dynamics and detail.</li>
+        </ul>
+        
+        <p>
+            The choice of filter depends on the specific requirements of the audio processing task:
+        </p>
+        
+        <ul>
+            <li>For <strong>speech enhancement</strong> where intelligibility is critical, the higher cutoff frequency of 4000 Hz is more appropriate as it preserves important consonant sounds.</li>
+            <li>For <strong>music processing</strong>, the more moderate parameter settings help maintain the natural timbre and dynamics of instruments.</li>
+            <li>For <strong>noise reduction</strong> in complex audio environments, the sequential filter with these parameters offers a good balance between noise removal and signal preservation.</li>
+        </ul>
+        
+        <p>
+            These parameter adjustments demonstrate how filter behavior can be fine-tuned to achieve different audio processing goals, from more aggressive noise reduction to more subtle enhancement that preserves the natural characteristics of the sound.
+        </p>
+    </section>
+
+    <footer>
+        <p><small>Generated report for audio filtering analysis - Created using Python with NumPy, SciPy, and Matplotlib</small></p>
+    </footer>
+</body>
+</html> 
