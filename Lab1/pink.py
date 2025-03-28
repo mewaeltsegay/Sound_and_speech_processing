@@ -222,7 +222,7 @@ if __name__ == "__main__":
     print(f"Loaded audio file: {sample_rate} Hz, {len(original_audio)} samples")
     
     # Apply FIR low-pass filter
-    cutoff_freq = 4000  # Hz
+    cutoff_freq = 1000  # Hz
     filter_order = 101
     fir_filtered_audio = filter_processor.create_lowpass_fir(filter_order, cutoff_freq)
     

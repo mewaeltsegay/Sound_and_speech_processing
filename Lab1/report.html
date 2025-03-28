@@ -180,7 +180,7 @@
                     <p>Where b₀, b₁, ..., bₙ are the filter coefficients and x[n] is the input signal.</p>
                     
                     <h4>Implementation Method:</h4>
-                    <p>Our implementation uses the window method with a sinc function (the ideal low-pass filter in the time domain) and a Hamming window to reduce spectral leakage. For this project, we use a cutoff frequency of <strong>4000 Hz</strong> and a filter order of 101.</p>
+                    <p>Our implementation uses the window method with a sinc function (the ideal low-pass filter in the time domain) and a Hamming window to reduce spectral leakage. For this project, we use a cutoff frequency of <strong>1000 Hz</strong> and a filter order of 101.</p>
                 </div>
             </div>
             <div class="filter-code">
@@ -225,10 +225,11 @@
                     </ul>
                     
                     <h4>How It Works:</h4>
-                    <p>The Kalman filter operates in two steps:</p>
+                    <p>The process follows these steps:</p>
                     <ol>
-                        <li><strong>Prediction Step:</strong> Predicts the current state based on the previous state</li>
-                        <li><strong>Update Step:</strong> Corrects the prediction using the current measurement</li>
+                        <li>The original audio signal is first processed by the Low-Pass FIR filter with a <strong>1000 Hz</strong> cutoff to remove high-frequency components</li>
+                        <li>The resulting filtered signal is then fed into the Kalman filter with a process variance of <strong>1e-3</strong> for further noise reduction and smoothing</li>
+                        <li>The final output combines the effects of both filters</li>
                     </ol>
                     
                     <h4>Applications in Audio:</h4>
@@ -280,7 +281,7 @@
                     <h4>How It Works:</h4>
                     <p>The process follows these steps:</p>
                     <ol>
-                        <li>The original audio signal is first processed by the Low-Pass FIR filter with a <strong>4000 Hz</strong> cutoff to remove high-frequency components</li>
+                        <li>The original audio signal is first processed by the Low-Pass FIR filter with a <strong>1000 Hz</strong> cutoff to remove high-frequency components</li>
                         <li>The resulting filtered signal is then fed into the Kalman filter with a process variance of <strong>1e-3</strong> for further noise reduction and smoothing</li>
                         <li>The final output combines the effects of both filters</li>
                     </ol>
@@ -342,7 +343,7 @@
             </tr>
             <tr>
                 <td>Parameters</td>
-                <td>Order (101), Cutoff frequency (<strong>4000 Hz</strong>)</td>
+                <td>Order (101), Cutoff frequency (<strong>1000 Hz</strong>)</td>
                 <td>Process variance (<strong>1e-3</strong>), Measurement variance (1e-2)</td>
                 <td>Combines parameters from both filters</td>
             </tr>
@@ -417,9 +418,9 @@
         
         <h4>Observations:</h4>
         <ul>
-            <li>The <strong>Low-Pass FIR Filter</strong> effectively removes high-frequency components above 4000 Hz, resulting in a slightly warmer sound while preserving more mid-range frequencies compared to a lower cutoff.</li>
+            <li>The <strong>Low-Pass FIR Filter</strong> with a 1000 Hz cutoff significantly reduces high-frequency components, resulting in a warmer sound with noticeably reduced brightness and hiss.</li>
             <li>The <strong>Kalman Filter</strong> with the increased process variance (1e-3) is more responsive to changes in the signal, resulting in less aggressive smoothing but better preservation of transient details.</li>
-            <li>The <strong>Sequential Filter</strong> combines both effects, first removing very high frequencies and then applying moderate smoothing to the remaining signal, creating a balanced noise reduction effect.</li>
+            <li>The <strong>Sequential Filter</strong> combines both effects, first removing frequencies above 1000 Hz and then applying moderate smoothing to the remaining signal, creating a more pronounced filtering effect than either filter alone.</li>
         </ul>
     </section>
 
@@ -477,9 +478,9 @@
         
         <h4>Observations:</h4>
         <ul>
-            <li>The <strong>Low-Pass FIR Filter</strong> with a 4000 Hz cutoff preserves most speech intelligibility, including many consonant sounds, while still reducing some high-frequency noise. This higher cutoff is more appropriate for speech than lower values.</li>
+            <li>The <strong>Low-Pass FIR Filter</strong> with a 1000 Hz cutoff removes many consonant sounds (like 's', 'f', 'th'), making the speech sound muffled but still intelligible. This lower cutoff significantly affects speech clarity.</li>
             <li>The <strong>Kalman Filter</strong> with increased process variance (1e-3) follows the speech contours more closely, preserving more of the natural voice characteristics while still reducing background noise.</li>
-            <li>The <strong>Sequential Filter</strong> provides a good balance, removing the highest frequency noise components while maintaining speech clarity and reducing fluctuations in the signal.</li>
+            <li>The <strong>Sequential Filter</strong> produces a more dramatic effect, with both reduced high-frequency content and smoothed transitions. This results in a warmer but less crisp voice quality with reduced intelligibility of certain consonants.</li>
         </ul>
     </section>
 
@@ -537,9 +538,9 @@
         
         <h4>Observations:</h4>
         <ul>
-            <li>The <strong>Low-Pass FIR Filter</strong> with a 4000 Hz cutoff preserves much more of the musical detail and brightness compared to lower cutoff frequencies, maintaining the character of most instruments while still reducing some high-frequency content.</li>
+            <li>The <strong>Low-Pass FIR Filter</strong> with a 1000 Hz cutoff significantly alters the timbre of the instruments, removing much of the brightness and detail from cymbals, strings, and other high-frequency content.</li>
             <li>The <strong>Kalman Filter</strong> with increased process variance (1e-3) better preserves the attack transients of instruments while still providing some smoothing effect, resulting in a more natural musical sound.</li>
-            <li>The <strong>Sequential Filter</strong> provides a balanced effect, removing some high-frequency content while preserving more of the musical dynamics than would be possible with more aggressive parameter settings.</li>
+            <li>The <strong>Sequential Filter</strong> dramatically changes the character of the music, creating a muffled, underwater-like quality with reduced dynamics, though the higher process variance helps preserve some of the musical articulation.</li>
         </ul>
     </section>
 
@@ -596,22 +597,22 @@
         
         <h4>Observations:</h4>
         <ul>
-            <li>The <strong>Low-Pass FIR Filter</strong> with a 4000 Hz cutoff selectively removes only the highest frequency components, preserving most of the audio's spectral character.</li>
+            <li>The <strong>Low-Pass FIR Filter</strong> with a 1000 Hz cutoff removes a significant amount of high-frequency detail, making the audio sound duller but potentially reducing harshness.</li>
             <li>The <strong>Kalman Filter</strong> with increased process variance (1e-3) tracks the signal changes more responsively, resulting in less smoothing but better preservation of the audio's unique characteristics.</li>
-            <li>The <strong>Sequential Filter</strong> demonstrates how even with more moderate parameter settings, the combination of filters still creates a distinctive sound that differs from either filter alone.</li>
+            <li>The <strong>Sequential Filter</strong> combines both effects, resulting in a heavily processed sound that demonstrates how cascading filters can create more dramatic transformations than either filter alone, even with the more responsive Kalman filter settings.</li>
         </ul>
     </section>
 
     <section class="filter-section">
         <h2>Conclusions</h2>
         <p>
-            Based on our analysis of the four audio cases with the updated parameters (4000 Hz cutoff and 1e-3 process variance), we can draw the following conclusions:
+            Based on our analysis of the four audio cases with the updated parameters (1000 Hz cutoff and 1e-3 process variance), we can draw the following conclusions:
         </p>
         
         <ul>
-            <li><strong>Low-Pass FIR Filter:</strong> The higher cutoff frequency of 4000 Hz preserves more of the audio's natural character while still providing some noise reduction. This setting is particularly beneficial for speech and music where preserving high-frequency detail is important.</li>
+            <li><strong>Low-Pass FIR Filter:</strong> The lower cutoff frequency of 1000 Hz significantly alters the audio's character by removing a substantial portion of high-frequency content. This setting is more aggressive and creates a warmer, less detailed sound.</li>
             <li><strong>Kalman Filter:</strong> The increased process variance of 1e-3 makes the filter more responsive to signal changes, resulting in less aggressive smoothing but better preservation of transient details and natural sound characteristics.</li>
-            <li><strong>Sequential Filtering:</strong> With the updated parameters, the sequential filter provides a more balanced effect that removes some high-frequency content while preserving more of the signal's dynamics and detail.</li>
+            <li><strong>Sequential Filtering:</strong> With these parameters, the sequential filter provides a more dramatic effect, first removing most high-frequency content with the 1000 Hz cutoff and then applying moderate smoothing to the remaining signal.</li>
         </ul>
         
         <p>
@@ -619,13 +620,13 @@
         </p>
         
         <ul>
-            <li>For <strong>speech enhancement</strong> where intelligibility is critical, the higher cutoff frequency of 4000 Hz is more appropriate as it preserves important consonant sounds.</li>
-            <li>For <strong>music processing</strong>, the more moderate parameter settings help maintain the natural timbre and dynamics of instruments.</li>
-            <li>For <strong>noise reduction</strong> in complex audio environments, the sequential filter with these parameters offers a good balance between noise removal and signal preservation.</li>
+            <li>For <strong>speech enhancement</strong>, the 1000 Hz cutoff may be too aggressive for optimal intelligibility, as it removes many consonant sounds that are important for speech clarity.</li>
+            <li>For <strong>music processing</strong>, this lower cutoff significantly alters the timbre of instruments, which may be desirable for special effects but less suitable for natural reproduction.</li>
+            <li>For <strong>noise reduction</strong> in environments with significant high-frequency noise, the 1000 Hz cutoff provides more aggressive noise removal at the expense of some signal quality.</li>
         </ul>
         
         <p>
-            These parameter adjustments demonstrate how filter behavior can be fine-tuned to achieve different audio processing goals, from more aggressive noise reduction to more subtle enhancement that preserves the natural characteristics of the sound.
+            These parameter settings demonstrate how filter behavior can be adjusted to achieve different audio processing goals, from more aggressive noise reduction and tonal shaping to more subtle enhancement that preserves the natural characteristics of the sound.
         </p>
     </section>
 
